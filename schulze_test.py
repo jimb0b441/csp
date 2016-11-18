@@ -22,7 +22,7 @@ wmgMap1[3][4] = 1
 wmgMap1[4][1] = -1
 wmgMap1[4][2] = -1
 wmgMap1[4][3] = -1
-preference1 = Preference(wmgMap1,3)
+preference1 = Preference(wmgMap1,2)
 
 #ranking 2: 3 @ b>d>c>a
 wmgMap2 = dict()
@@ -93,5 +93,5 @@ candMap[4] = 'diane'
 
 profile = Profile(candMap, preferences)
 print(profile.getWmg())
-mechanism = mechanism.MechanismSchulze()
+mechanism = mechanism.MechanismSchulzeK()
 print(mechanism.getRanking(profile))
