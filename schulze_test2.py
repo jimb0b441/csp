@@ -3,6 +3,9 @@
 from profile import Profile
 from preference import Preference
 import mechanism 
+import sys
+import numpy as np
+import time
 
 def genPref(ranking, num_votes):
 	wmgMap = dict()
@@ -17,82 +20,33 @@ def genPref(ranking, num_votes):
 					wmgMap[i][j] = -1
 	return Preference(wmgMap, num_votes)
 
+def Main():
+	icand = int(sys.argv[1]) # no. of candidates
+	iranks = int(sys.argv[2]) # no. of rankings
 
-preferences = []
+	preferences = []
+	for i in range(iranks):
+		preferences.append(genPref((np.random.permutation(icand)+1).tolist(), np.random.randint(iranks)+1))
 
-#c>d>b>a, with c, d, and b in a cycle (schwartz set)
-#tie breaking needed to rank the schwartz set
-preferences.append(genPref([1,2,3,4], 0))
-preferences.append(genPref([1,2,4,3], 0))
-preferences.append(genPref([1,3,2,4], 0))
-preferences.append(genPref([1,3,4,2], 0))
-preferences.append(genPref([1,4,2,3], 0))
-preferences.append(genPref([1,4,3,2], 0))
-preferences.append(genPref([2,1,4,3], 0))
-preferences.append(genPref([2,1,3,4], 0))
-preferences.append(genPref([2,3,4,1], 2))
-preferences.append(genPref([2,3,1,4], 0))
-preferences.append(genPref([2,4,3,1], 0))
-preferences.append(genPref([2,4,1,3], 0))
-preferences.append(genPref([3,1,2,4], 0))
-preferences.append(genPref([3,1,4,2], 0))
-preferences.append(genPref([3,2,1,4], 0))
-preferences.append(genPref([3,2,4,1], 0))
-preferences.append(genPref([3,4,1,2], 0))
-preferences.append(genPref([3,4,2,1], 4))
-preferences.append(genPref([4,1,3,2], 0))
-preferences.append(genPref([4,1,2,3], 0))
-preferences.append(genPref([4,2,3,1], 3))
-preferences.append(genPref([4,2,1,3], 0))
-preferences.append(genPref([4,3,2,1], 0))
-preferences.append(genPref([4,3,1,2], 0))
+	candMap = dict()
+	for i in range(icand):
+		candMap[i+1] = i+1
 
-#similar to above, but order is a>c>d>b
-#shows how ranking in non-schwartz set can't be computed
-'''
-preferences.append(genPref([1,2,3,4], 2))
-preferences.append(genPref([1,2,4,3], 0))
-preferences.append(genPref([1,3,2,4], 0))
-preferences.append(genPref([1,3,4,2], 4))
-preferences.append(genPref([1,4,2,3], 3))
-preferences.append(genPref([1,4,3,2], 0))
-preferences.append(genPref([2,1,4,3], 0))
-preferences.append(genPref([2,1,3,4], 0))
-preferences.append(genPref([2,3,4,1], 0))
-preferences.append(genPref([2,3,1,4], 0))
-preferences.append(genPref([2,4,3,1], 0))
-preferences.append(genPref([2,4,1,3], 0))
-preferences.append(genPref([3,1,2,4], 0))
-preferences.append(genPref([3,1,4,2], 0))
-preferences.append(genPref([3,2,1,4], 0))
-preferences.append(genPref([3,2,4,1], 0))
-preferences.append(genPref([3,4,1,2], 0))
-preferences.append(genPref([3,4,2,1], 0))
-preferences.append(genPref([4,1,3,2], 0))
-preferences.append(genPref([4,1,2,3], 0))
-preferences.append(genPref([4,2,3,1], 0))
-preferences.append(genPref([4,2,1,3], 0))
-preferences.append(genPref([4,3,2,1], 0))
-preferences.append(genPref([4,3,1,2], 0))
-'''
+	profile = Profile(candMap, preferences)
 
-candMap = dict()
-candMap[1] = 'alice'
-candMap[2] = 'bob'
-candMap[3] = 'charley'
-candMap[4] = 'diane'
+	start = time.time()
+	mechanism1 = mechanism.MechanismSchulzeFW()
+	rankingFW = mechanism1.getRanking(profile)
+	end = time.time()
+	print()
+	print('Floyd-Warshall elapsed time: ', end-start)
 
-profile = Profile(candMap, preferences)
-print(profile.getWmg())
+	start = time.time()
+	mechanism2 = mechanism.MechanismSchulzeK()
+	rankingK = mechanism2.getRanking(profile)
+	end = time.time()
+	print()
+	print("Kosaraju elapsed time: ", end-start)
 
-mechanism1 = mechanism.MechanismSchulzeFW()
-rankingFW = mechanism1.getRanking(profile)
-print
-print("Floyd-Warshall ranking:")
-print(rankingFW)
-
-mechanism2 = mechanism.MechanismSchulzeK()
-rankingK = mechanism2.getRanking(profile)
-print
-print("Kosaraju ranking:")
-print(rankingK)
+if __name__ == '__main__':
+	Main()
